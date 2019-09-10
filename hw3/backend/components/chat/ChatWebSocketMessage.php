@@ -1,9 +1,7 @@
 <?php
-
-
 namespace backend\components\chat;
 
-
+use backend\models\Messages;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 use yii\helpers\Console;
@@ -64,9 +62,17 @@ class ChatWebSocketMessage implements MessageComponentInterface
         echo Console::ansiFormat('Получено сообщение от пользователя '.$from->resourceId.' '.$msg, [Console::FG_GREEN]).PHP_EOL;
 
         foreach ($this->clients as $client) {
-            //if($from!==$client) {
-                $client->send(date('H:i:s').': ['.$from->resourceId.'] '.$msg);
-           // }
+            $client->send(date('H:i:s').': ['.$from->resourceId.'] '.$msg);
+        }
+
+        $messages = new Messages();
+        $messages->id_user = $from->resourceId;
+        $messages->message = $msg;
+        $messages->created_at = '1111111111';
+        if ($messages->validate()) {
+            $messages->save();
+        } else {
+            echo $messages->getErrors();
         }
     }
 }
